@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册管理系统</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1, h2, h3 {
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"],
+        input[type="tel"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            min-height: 150px;
+            font-family: monospace;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            margin-bottom: 20px;
+        }
+        
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            color: black;
+        }
+        
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        
+        .tab button.active {
+            background-color: #ccc;
+        }
+        
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+        
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        
+        .warning {
+            color: orange;
+            margin-top: 10px;
+        }
+        
+        .content-section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        
+        pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 400px;
+            margin: 0;
+        }
+
+        /* 短信通知弹窗样式 */
+        .sms-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: fadeIn 0.5s, fadeOut 0.5s 5.5s;
+            max-width: 300px;
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        @keyframes fadeOut {
+            from {opacity: 1;}
+            to {opacity: 0;}
+        }
+        
+        /* 状态标签样式 */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background-color: #f0ad4e;
+            color: white;
+        }
+        
+        .status-approved {
+            background-color: #5cb85c;
+            color: white;
+        }
+        
+        .status-rejected {
+            background-color: #d9534f;
+            color: white;
+        }
+        
+        /* 内容栏目样式 */
+        .content-nav {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .content-nav button {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 8px 15px;
+            border-radius: 4px;
+        }
+        
+        .content-nav button.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .code-container {
+            margin-top: 15px;
+        }
+        
+        .code-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        
+        .admin-code-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>用户注册管理系统</h1>
+        
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'Register')" id="defaultOpen">注册</button>
+            <button class="tablinks" onclick="openTab(event, 'StatusCheck')">查询审批状态</button>
+            <button class="tablinks" onclick="openTab(event, 'Login')">登录</button>
+            <button class="tablinks" onclick="openTab(event, 'Admin')">管理员</button>
+            <button class="tablinks" onclick="openTab(event, 'Content')" id="contentTab">内容</button>
+        </div>
+        
+        <!-- 注册选项卡 -->
+        <div id="Register" class="tabcontent">
+            <h2>用户注册</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">姓名:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="organization">单位:</label>
+                    <input type="text" id="organization" name="organization" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">电话号码:</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码:</label>
+                    <input type="password" id="registerPassword" name="password" required>
+                </div>
+                <button type="submit">提交注册</button>
+            </form>
+            <div id="registerMessage"></div>
+        </div>
+        
+        <!-- 审批状态查询选项卡 -->
+        <div id="StatusCheck" class="tabcontent">
+            <h2>查询审批状态</h2>
+            <form id="statusCheckForm">
+                <div class="form-group">
+                    <label for="checkPhone">电话号码:</label>
+                    <input type="tel" id="checkPhone" name="phone" required>
+                </div>
+                <button type="submit">查询状态</button>
+            </form>
+            <div id="statusResult"></div>
+        </div>
+        
+        <!-- 登录选项卡 -->
+        <div id="Login" class="tabcontent">
+            <h2>用户登录</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginPhone">电话号码:</label>
+                    <input type="tel" id="loginPhone" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码:</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit">登录</button>
+            </form>
+            <div id="loginMessage"></div>
+        </div>
+        
+        <!-- 管理员选项卡 -->
+        <div id="Admin" class="tabcontent">
+            <h2>管理员登录</h2>
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="adminUsername">管理员用户名:</label>
+                    <input type="text" id="adminUsername" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">管理员密码:</label>
+                    <input type="password" id="adminPassword" name="password" required>
+                </div>
+                <button type="submit">管理员登录</button>
+            </form>
+            <div id="adminLoginMessage"></div>
+            
+            <div id="adminPanel" class="hidden">
+                <h2>待审批用户</h2>
+                <table id="pendingUsersTable">
+                    <thead>
+                        <tr>
+                            <th>姓名</th>
+                            <th>单位</th>
+                            <th>电话号码</th>
+                            <th>审批状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pendingUsersList">
+                        <!-- 这里会通过JavaScript动态填充待审批用户 -->
+                    </tbody>
+                </table>
+                <div id="noPendingUsers" class="hidden">暂无待审批用户</div>
+                
+                <!-- 代码文件管理 -->
+                <h2>代码文件管理</h2>
+                <div id="codeFileManager">
+                    <h3>上传新代码文件</h3>
+                    <form id="uploadCodeForm">
+                        <div class="form-group">
+                            <label for="codeTitle">标题:</label>
+                            <input type="text" id="codeTitle" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="codeDescription">描述:</label>
+                            <input type="text" id="codeDescription" name="description" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="codeContent">代码内容:</label>
+                            <textarea id="codeContent" name="content" required></textarea>
+                        </div>
+                        <button type="submit">上传代码</button>
+                    </form>
+                    
+                    <h3>现有代码文件</h3>
+                    <div id="existingCodeFiles">
+                        <!-- 这里会通过JavaScript动态填充已有代码文件 -->
+                    </div>
+                    <div id="noCodeFiles" class="hidden">暂无代码文件</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 内容选项卡 -->
+        <div id="Content" class="tabcontent">
+            <h2>资源内容</h2>
+            <div id="contentNotice">请先登录查看内容</div>
+            
+            <div id="contentArea" class="hidden">
+                <div class="content-nav" id="codeNav">
+                    <!-- 代码栏目按钮将在这里动态生成 -->
+                </div>
+                
+                <div id="codeContentArea">
+                    <!-- 选中的代码内容将在这里显示 -->
+                    <div class="content-section" id="welcomeContent">
+                        <h3>欢迎访问代码资源中心</h3>
+                        <p>请点击上方的栏目按钮查看相应的代码文件。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 短信通知弹窗 -->
+    <div id="smsNotification" class="sms-notification hidden"></div>
+
+    <script>
+        // 初始化本地存储
+        if (!localStorage.getItem('users')) {
+            localStorage.setItem('users', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('pendingUsers')) {
+            localStorage.setItem('pendingUsers', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('codeFiles')) {
+            localStorage.setItem('codeFiles', JSON.stringify([]));
+        }
+        
+        // 设置默认管理员账户
+        if (!localStorage.getItem('admin')) {
+            localStorage.setItem('admin', JSON.stringify({
+                username: 'admin',
+                password: 'admin123'
+            }));
+        }
+        
+        // 默认打开注册选项卡
+        document.getElementById("defaultOpen").click();
+        
+        // 选项卡切换函数
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            // 隐藏所有选项卡内容
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            
+            // 移除所有选项卡按钮的active类
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+        // 显示当前选项卡并添加active类到按钮
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        // 获取状态显示文本
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending':
+                    return '待审核';
+                case 'approved':
+                    return '已批准';
+                case 'rejected':
+                    return '已拒绝';
+                default:
+                    return '未知状态';
+            }
+        }
+        
+        // 获取状态显示样式类
+        function getStatusClass(status) {
+            switch(status) {
+                case 'pending':
+                    return 'status-pending';
+                case 'approved':
+                    return 'status-approved';
+                case 'rejected':
+                    return 'status-rejected';
+                default:
+                    return '';
+            }
+        }
+        
+        // 注册表单提交处理
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const organization = document.getElementById('organization').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            // 检查手机号码是否已注册
+            const existingUsers = JSON.parse(localStorage.getItem('users'));
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers'));
+            
+            if (existingUsers.some(user => user.phone === phone)) {
+                document.getElementById('registerMessage').innerHTML = 
+                    '<p class="error">该手机号码已注册，请使用其他手机号码</p>';
+                return;
+            }
+            
+            // 检查是否已在审核中
+            const existingPendingUser = pendingUsers.find(user => user.phone === phone);
+            if (existingPendingUser) {
+                document.getElementById('registerMessage').innerHTML = 
+                    `<p class="warning">该手机号码已提交注册申请，当前状态：<span class="${getStatusClass(existingPendingUser.status)}">${getStatusText(existingPendingUser.status)}</span></p>`;
+                return;
+            }
+            
+            // 添加到待审批用户
+            pendingUsers.push({
+                username: username,
+                organization: organization,
+                phone: phone,
+                password: password,
+                status: 'pending',
+                registrationDate: new Date().toISOString()
+            });
+            
+            localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+            
+            document.getElementById('registerMessage').innerHTML = 
+                '<p class="success">注册申请已提交，请等待管理员审批。您可以在"查询审批状态"选项卡中查看审核进度。</p>';
+            document.getElementById('registerForm').reset();
+        });
+        
+        // 状态查询表单提交处理
+        document.getElementById('statusCheckForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('checkPhone').value;
+            const statusResult = document.getElementById('statusResult');
+            
+            // 查找用户
+            const users = JSON.parse(localStorage.getItem('users'));
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers'));
+            
+            const approvedUser = users.find(user => user.phone === phone);
+            if (approvedUser) {
+                statusResult.innerHTML = 
+                    `<p class="success">您的注册申请已通过审核，可以使用手机号码和密码登录系统。</p>`;
+                return;
+            }
+            
+            const pendingUser = pendingUsers.find(user => user.phone === phone);
+            if (pendingUser) {
+                const statusText = getStatusText(pendingUser.status);
+                const statusClass = getStatusClass(pendingUser.status);
+                
+                let message = `<p>姓名: ${pendingUser.username}<br>
+                              单位: ${pendingUser.organization}<br>
+                              申请状态: <span class="status-badge ${statusClass}">${statusText}</span></p>`;
+                              
+                if (pendingUser.status === 'pending') {
+                    message += '<p class="warning">您的申请正在审核中，请耐心等待。</p>';
+                } else if (pendingUser.status === 'rejected') {
+                    message += '<p class="error">很遗憾，您的申请未通过审核。如有疑问，请联系管理员。</p>';
+                }
+                
+                statusResult.innerHTML = message;
+            } else {
+                statusResult.innerHTML = 
+                    '<p class="error">未找到该手机号码的注册申请，请确认输入正确或提交注册申请。</p>';
+            }
+        });
+        
+        // 登录表单提交处理
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const phone = document.getElementById('loginPhone').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const users = JSON.parse(localStorage.getItem('users'));
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers'));
+            
+            const user = users.find(user => user.phone === phone && user.password === password);
+            
+            if (user) {
+                // 登录成功
+                sessionStorage.setItem('loggedIn', 'true');
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                
+                document.getElementById('loginMessage').innerHTML = 
+                    '<p class="success">登录成功！</p>';
+                
+                // 显示内容选项卡并自动切换到内容页面
+                document.getElementById('contentTab').click();
+                showContent();
+            } else {
+                // 检查是否在待审批用户中
+                const pendingUser = pendingUsers.find(user => user.phone === phone);
+                
+                if (pendingUser) {
+                    if (pendingUser.status === 'pending') {
+                        document.getElementById('loginMessage').innerHTML = 
+                            '<p class="warning">您的账户正在审核中，请耐心等待审核通过后再登录。</p>';
+                    } else if (pendingUser.status === 'rejected') {
+                        document.getElementById('loginMessage').innerHTML = 
+                            '<p class="error">您的注册申请已被拒绝，如有疑问请联系管理员。</p>';
+                    }
+                } else {
+                    document.getElementById('loginMessage').innerHTML = 
+                        '<p class="error">电话号码或密码错误，或您尚未注册。</p>';
+                }
+            }
+        });
+        
+        // 管理员登录处理
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            const admin = JSON.parse(localStorage.getItem('admin'));
+            
+            if (username === admin.username && password === admin.password) {
+                document.getElementById('adminLoginMessage').innerHTML = 
+                    '<p class="success">管理员登录成功！</p>';
+                
+                document.getElementById('adminLoginForm').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                
+                // 加载待审批用户
+                loadPendingUsers();
+                
+                // 加载代码文件
+                loadCodeFiles();
+            } else {
+                document.getElementById('adminLoginMessage').innerHTML = 
+                    '<p class="error">管理员用户名或密码错误</p>';
+            }
+        });
+        
+        // 加载待审批用户
+        function loadPendingUsers() {
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers'));
+            const pendingUsersList = document.getElementById('pendingUsersList');
+            const noPendingUsers = document.getElementById('noPendingUsers');
+            
+            pendingUsersList.innerHTML = '';
+            
+            if (pendingUsers.length === 0) {
+                noPendingUsers.classList.remove('hidden');
+                document.getElementById('pendingUsersTable').classList.add('hidden');
+            } else {
+                noPendingUsers.classList.add('hidden');
+                document.getElementById('pendingUsersTable').classList.remove('hidden');
+                
+                pendingUsers.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    const statusText = getStatusText(user.status);
+                    const statusClass = getStatusClass(user.status);
+                    
+                    // 创建操作按钮，根据状态显示不同的按钮
+                    let actionButtons = '';
+                    if (user.status === 'pending') {
+                        actionButtons = `
+                            <button onclick="approveUser(${index})">批准</button>
+                            <button onclick="rejectUser(${index})">拒绝</button>
+                        `;
+                    } else if (user.status === 'rejected') {
+                        actionButtons = `
+                            <button onclick="approveUser(${index})">重新批准</button>
+                            <button onclick="removeUser(${index})">删除</button>
+                        `;
+                    } else {
+                        actionButtons = `
+                            <button onclick="removeUser(${index})">删除</button>
+                        `;
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${user.username}</td>
+                        <td>${user.organization}</td>
+                        <td>${user.phone}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            ${actionButtons}
+                        </td>
+                    `;
+                    
+                    pendingUsersList.appendChild(row);
+                });
+            }
+        }
+        
+        // 显示短信通知
+        function showSMSNotification(phoneNumber, message) {
+            const notification = document.getElementById('smsNotification');
+            notification.textContent = message;
+            notification.classList.remove('hidden');
+            
+            // 6秒后隐藏通知
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 6000);
+        }
+        
+        // 批准用户
+        window.approveUser = function(index) {
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers'));
+            const users = JSON.parse(localStorage.getItem('users'));
+            
+            // 更新用户状态为已批准
+            pendingUsers[index].status = 'approved';
+            
+            // 复制用户到已审批用户列表
+            const approvedUser = {...pendingUsers[index]};
+            users.push(approvedUser);
+            
+            localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // 显示短信通知
+            const message = `【网站注册系统】尊敬的${approvedUser.username}，您在本系统的注册申请已通过审核，现在可以使用您的手机号码和密码登录系统。`;
+            showSMSNotification(approvedUser.phone, message);
+            
+            // 重新加载待审批用户列表
+            loadPendingUsers();
+        };
+        
+        // 拒绝用户
+        window.rejectUser = function(index) {
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers'));
+            
+            // 更新用户状态为已拒绝
+            pendingUsers[index].status = 'rejected';
+            localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+            
+            // 显示短信通知
+            const user = pendingUsers[index];
+            const message = `【网站注册系统】尊敬的${user.username}，很遗憾您在本系统的注册申请未通过审核，如有疑问请联系管理员。`;
+            showSMSNotification(user.phone, message);
+            
+            // 重新加载待审批用户列表
+            loadPendingUsers();
+        };
+        
+        // 删除用户
+        window.removeUser = function(index) {
+            const pendingUsers = JSON.parse(localStorage.getItem('pendingUsers'));
+            
+            // 从待审批列表中移除用户
+            pendingUsers.splice(index, 1);
+            localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
+            
+            // 重新加载待审批用户列表
+            loadPendingUsers();
+        };
+        
+        // 上传代码文件
+        document.getElementById('uploadCodeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('codeTitle').value;
+            const description = document.getElementById('codeDescription').value;
+            const content = document.getElementById('codeContent').value;
+            
+            const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+            
+            // 添加新代码文件
+            codeFiles.push({
+                id: Date.now(), // 使用时间戳作为唯一ID
+                title: title,
+                description: description,
+                content: content,
+                uploadDate: new Date().toISOString()
+            });
+            
+            localStorage.setItem('codeFiles', JSON.stringify(codeFiles));
+            
+            // 重置表单
+            document.getElementById('uploadCodeForm').reset();
+            
+            // 重新加载代码文件列表
+            loadCodeFiles();
+            
+            // 更新内容选项卡中的代码栏目
+            updateCodeNav();
+            
+            alert('代码文件上传成功！');
+        });
+        
+        // 加载代码文件
+        function loadCodeFiles() {
+            const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+            const existingCodeFiles = document.getElementById('existingCodeFiles');
+            const noCodeFiles = document.getElementById('noCodeFiles');
+            
+            existingCodeFiles.innerHTML = '';
+            
+            if (codeFiles.length === 0) {
+                noCodeFiles.classList.remove('hidden');
+            } else {
+                noCodeFiles.classList.add('hidden');
+                
+                codeFiles.forEach((file, index) => {
+                    const codeItem = document.createElement('div');
+                    codeItem.className = 'admin-code-item';
+                    
+                    codeItem.innerHTML = `
+                        <h4>${file.title}</h4>
+                        <p>${file.description}</p>
+                        <div class="code-actions">
+                            <button onclick="editCodeFile(${file.id})">编辑</button>
+                            <button onclick="deleteCodeFile(${file.id})">删除</button>
+                        </div>
+                    `;
+                    
+                    existingCodeFiles.appendChild(codeItem);
+                });
+            }
+        }
+        
+        // 编辑代码文件
+        window.editCodeFile = function(id) {
+            const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+            const file = codeFiles.find(file => file.id === id);
+            
+            if (file) {
+                document.getElementById('codeTitle').value = file.title;
+                document.getElementById('codeDescription').value = file.description;
+                document.getElementById('codeContent').value = file.content;
+                
+                // 添加更新按钮，替换提交按钮
+                const uploadBtn = document.querySelector('#uploadCodeForm button[type="submit"]');
+                uploadBtn.textContent = '更新代码';
+                uploadBtn.dataset.editId = id;
+                
+                // 修改表单提交处理函数
+                document.getElementById('uploadCodeForm').onsubmit = function(e) {
+                    e.preventDefault();
+                    
+                    const editId = parseInt(uploadBtn.dataset.editId);
+                    const title = document.getElementById('codeTitle').value;
+                    const description = document.getElementById('codeDescription').value;
+                    const content = document.getElementById('codeContent').value;
+                    
+                    const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+                    const fileIndex = codeFiles.findIndex(file => file.id === editId);
+                    
+                    if (fileIndex !== -1) {
+                        codeFiles[fileIndex] = {
+                            ...codeFiles[fileIndex],
+                            title: title,
+                            description: description,
+                            content: content,
+                            lastModified: new Date().toISOString()
+                        };
+                        
+                        localStorage.setItem('codeFiles', JSON.stringify(codeFiles));
+                        
+                        // 恢复表单为上传新文件模式
+                        document.getElementById('uploadCodeForm').reset();
+                        uploadBtn.textContent = '上传代码';
+                        uploadBtn.removeAttribute('data-edit-id');
+                        
+                        // 恢复默认提交处理
+                        document.getElementById('uploadCodeForm').onsubmit = null;
+                        document.getElementById('uploadCodeForm').addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            
+                            const title = document.getElementById('codeTitle').value;
+                            const description = document.getElementById('codeDescription').value;
+                            const content = document.getElementById('codeContent').value;
+                            
+                            const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+                            
+                            // 添加新代码文件
+                            codeFiles.push({
+                                id: Date.now(),
+                                title: title,
+                                description: description,
+                                content: content,
+                                uploadDate: new Date().toISOString()
+                            });
+                            
+                            localStorage.setItem('codeFiles', JSON.stringify(codeFiles));
+                            
+                            // 重置表单
+                            document.getElementById('uploadCodeForm').reset();
+                            
+                            // 重新加载代码文件列表
+                            loadCodeFiles();
+                            
+                            // 更新内容选项卡中的代码栏目
+                            updateCodeNav();
+                            
+                            alert('代码文件上传成功！');
+                        });
+                        
+                        // 重新加载代码文件列表
+                        loadCodeFiles();
+                        
+                        // 更新内容选项卡中的代码栏目
+                        updateCodeNav();
+                        
+                        alert('代码文件更新成功！');
+                    }
+                };
+            }
+        };
+        
+        // 删除代码文件
+        window.deleteCodeFile = function(id) {
+            if (confirm('确定要删除这个代码文件吗？')) {
+                const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+                const fileIndex = codeFiles.findIndex(file => file.id === id);
+                
+                if (fileIndex !== -1) {
+                    codeFiles.splice(fileIndex, 1);
+                    localStorage.setItem('codeFiles', JSON.stringify(codeFiles));
+                    
+                    // 重新加载代码文件列表
+                    loadCodeFiles();
+                    
+                    // 更新内容选项卡中的代码栏目
+                    updateCodeNav();
+                    
+                    alert('代码文件已删除！');
+                }
+            }
+        };
+        
+        // 显示内容
+        function showContent() {
+            const isLoggedIn = sessionStorage.getItem('loggedIn') === 'true';
+            
+            if (isLoggedIn) {
+                document.getElementById('contentNotice').classList.add('hidden');
+                document.getElementById('contentArea').classList.remove('hidden');
+                
+                // 更新代码栏目导航
+                updateCodeNav();
+            } else {
+                document.getElementById('contentNotice').classList.remove('hidden');
+                document.getElementById('contentArea').classList.add('hidden');
+            }
+        }
+        
+        // 更新代码栏目导航
+        function updateCodeNav() {
+            const codeNav = document.getElementById('codeNav');
+            const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+            
+            // 清空现有的导航按钮
+            codeNav.innerHTML = '';
+            
+            // 限制最多显示5个栏目
+            const filesToShow = codeFiles.slice(0, 5);
+            
+            if (filesToShow.length === 0) {
+                const welcomeMsg = document.createElement('p');
+                welcomeMsg.textContent = '暂无代码文件可供查看，请等待管理员上传。';
+                codeNav.appendChild(welcomeMsg);
+            } else {
+                filesToShow.forEach((file, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = file.title;
+                    button.dataset.fileId = file.id;
+                    
+                    // 默认第一个按钮为激活状态
+                    if (index === 0) {
+                        button.className = 'active';
+                        displayCodeContent(file.id);
+                    }
+                    
+                    button.addEventListener('click', function() {
+                        // 移除所有按钮的active类
+                        const buttons = codeNav.querySelectorAll('button');
+                        buttons.forEach(btn => btn.classList.remove('active'));
+                        
+                        // 添加active类到当前按钮
+                        this.classList.add('active');
+                        
+                        // 显示对应的代码内容
+                        displayCodeContent(file.id);
+                    });
+                    
+                    codeNav.appendChild(button);
+                });
+            }
+        }
+        
+        // 显示代码内容
+        function displayCodeContent(id) {
+            const codeContentArea = document.getElementById('codeContentArea');
+            const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+            const file = codeFiles.find(file => file.id === parseInt(id) || file.id === id);
+            
+            if (file) {
+                codeContentArea.innerHTML = `
+                    <div class="content-section">
+                        <h3>${file.title}</h3>
+                        <p>${file.description}</p>
+                        <pre>${file.content}</pre>
+                    </div>
+                `;
+            } else {
+                codeContentArea.innerHTML = `
+                    <div class="content-section">
+                        <h3>找不到代码文件</h3>
+                        <p>请选择其他代码文件或联系管理员。</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 检查是否已登录并显示相应内容
+        document.getElementById('contentTab').addEventListener('click', showContent);
+        
+        // 页面加载时添加示例代码文件（如果没有代码文件）
+        window.onload = function() {
+            if (sessionStorage.getItem('loggedIn') === 'true') {
+                showContent();
+            }
+            
+            const codeFiles = JSON.parse(localStorage.getItem('codeFiles'));
+            
+            // 如果没有代码文件，添加示例代码文件
+            if (codeFiles.length === 0) {
+                const exampleFiles = [
+                    {
+                        id: 1,
+                        title: 'Python情绪分析',
+                        description: '使用NLTK库进行简单的情绪分析示例代码',
+                        content: `import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+
+# 下载必要的资源
+nltk.download('vader_lexicon')
+
+# 初始化情绪分析器
+sia = SentimentIntensityAnalyzer()
+
+# 分析文本情绪
+def analyze_sentiment(text):
+    sentiment = sia.polarity_scores(text)
+    if sentiment['compound'] >= 0.05:
+        return "正面情绪"
+    elif sentiment['compound'] <= -0.05:
+        return "负面情绪"
+    else:
+        return "中性情绪"
+
+# 示例
+text = "今天天气真好，我感到非常开心！"
+print(f"文本: {text}")
+print(f"情绪分析结果: {analyze_sentiment(text)}")`,
+                        uploadDate: new Date().toISOString()
+                    },
+                    {
+                        id: 2,
+                        title: 'AutoGen对话代理',
+                        description: '使用AutoGen框架创建对话代理的简单示例',
+                        content: `import autogen
+
+# 配置助手和用户代理
+assistant = autogen.AssistantAgent(
+    name="AI助手",
+    llm_config={
+        "config_list": [{"model": "gpt-3.5-turbo", "api_key": "YOUR_API_KEY"}]
+    }
+)
+
+user_proxy = autogen.UserProxyAgent(
+    name="用户",
+    human_input_mode="TERMINATE",
+    max_consecutive_auto_reply=10
+)
+
+# 启动对话
+user_proxy.initiate_chat(
+    assistant,
+    message="请解释什么是机器学习，并给我一个简单的例子。"
+)`,
+                        uploadDate: new Date().toISOString()
+                    },
+                    {
+                        id: 3,
+                        title: '简单数据可视化',
+                        description: '使用Matplotlib库进行基础数据可视化',
+                        content: `import matplotlib.pyplot as plt
+import numpy as np
+
+# 创建示例数据
+categories = ['类别A', '类别B', '类别C', '类别D', '类别E']
+values = [25, 40, 30, 55, 15]
+
+# 创建柱状图
+plt.figure(figsize=(10, 6))
+bars = plt.bar(categories, values, color='skyblue')
+
+# 添加数值标签
+for bar in bars:
+    height = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2., height + 1,
+            f'{height}',
+            ha='center', va='bottom')
+
+# 设置标题和标签
+plt.title('数据类别分布')
+plt.xlabel('类别')
+plt.ylabel('数值')
+plt.ylim(0, max(values) * 1.2)
+
+# 显示图表
+plt.tight_layout()
+plt.show()`,
+                        uploadDate: new Date().toISOString()
+                    },
+                    {
+                        id: 4,
+                        title: 'Flask Web应用示例',
+                        description: '创建基础的Flask Web应用程序',
+                        content: `from flask import Flask, render_template, request, redirect, url_for
+
+app = Flask(__name__)
+
+# 示例数据 - 在实际应用中通常会使用数据库
+tasks = [
+    {'id': 1, 'title': '完成项目文档', 'done': False},
+    {'id': 2, 'title': '实现用户认证功能', 'done': True},
+    {'id': 3, 'title': '设计数据库结构', 'done': False}
+]
+
+@app.route('/')
+def index():
+    return render_template('index.html', tasks=tasks)
+
+@app.route('/add', methods=['POST'])
+def add_task():
+    title = request.form.get('title')
+    if title:
+        task_id = tasks[-1]['id'] + 1 if tasks else 1
+        tasks.append({'id': task_id, 'title': title, 'done': False})
+    return redirect(url_for('index'))
+
+@app.route('/toggle/<int:task_id>')
+def toggle_task(task_id):
+    for task in tasks:
+        if task['id'] == task_id:
+            task['done'] = not task['done']
+            break
+    return redirect(url_for('index'))
+
+@app.route('/delete/<int:task_id>')
+def delete_task(task_id):
+    global tasks
+    tasks = [task for task in tasks if task['id'] != task_id]
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True)`,
+                        uploadDate: new Date().toISOString()
+                    },
+                    {
+                        id: 5,
+                        title: '机器学习分类器',
+                        description: '使用Scikit-learn库实现简单的分类模型',
+                        content: `from sklearn import datasets
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# 加载示例数据集
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target
+
+# 划分训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# 创建并训练随机森林分类器
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# 在测试集上进行预测
+y_pred = model.predict(X_test)
+
+# 评估模型性能
+accuracy = accuracy_score(y_test, y_pred)
+report = classification_report(y_test, y_pred, target_names=iris.target_names)
+
+print(f"模型准确率: {accuracy:.4f}")
+print("\\n分类报告:")
+print(report)
+
+# 使用模型进行预测
+sample = [[5.1, 3.5, 1.4, 0.2]]  # 一个鸢尾花样本
+prediction = model.predict(sample)
+print(f"\\n预测结果: {iris.target_names[prediction[0]]}")`,
+                        uploadDate: new Date().toISOString()
+                    }
+                ];
+                
+                localStorage.setItem('codeFiles', JSON.stringify(exampleFiles));
+            }
+        };
+    </script>
+</body>
+</html>
